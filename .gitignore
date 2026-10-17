@@ -1,0 +1,44 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Python caches and compiled files
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Private source data
+/source/
+
+# Private research workspace
+/local/
+
+# Database files
+*.duckdb
+*.duckdb.wal
+*.db
+
+# Jupyter checkpoints and notebook files
+.ipynb_checkpoints/
+*.ipynb
+
+# Environment variables and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Editor and operating system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.log
