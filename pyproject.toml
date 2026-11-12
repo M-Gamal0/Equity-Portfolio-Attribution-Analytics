@@ -1,19 +1,50 @@
 [project]
 name = "portfolio-analytics"
 version = "0.1.0"
-description = "Add your description here"
+description = "Independent equity portfolio performance, attribution, risk and factor analytics"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     { name = "Mohammed Gamal", email = "mohammedgamal5556@gmail.com" }
 ]
 requires-python = ">=3.13"
 dependencies = [
-    "duckdb>=1.5.6",
+    "duckdb>=1.5.6,<2",
     "numpy>=2.5.4",
     "pandas>=3.0.6",
+    "pyarrow>=26.0.0",
     "scipy>=1.18.1",
-    "statsmodels>=0.15.0",
 ]
+
+[project.scripts]
+portfolio-analytics = "portfolio_analytics.cli:main"
+portfolio-analytics-demo = "portfolio_analytics.demo.cli:main"
+
+[project.urls]
+Repository = "https://github.com/M-Gamal0/Equity-Portfolio-Attribution-Analytics"
+
+[project.optional-dependencies]
+demo = [
+    "yfinance>=1.8.0,<2",
+]
+app = [
+    "streamlit>=1.66.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "research: requires the private pinned snapshot (explicit opt-in)",
+    "public_demo: requires an explicitly selected prepared public-demo workspace",
+]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+
+[tool.ruff.lint.per-file-ignores]
+# Retain the notebook function AST for traceable extraction parity.
+"src/portfolio_analytics/factors/attribution.py" = ["F841"]
 
 [build-system]
 requires = ["uv_build>=0.13.1,<0.14.0"]
