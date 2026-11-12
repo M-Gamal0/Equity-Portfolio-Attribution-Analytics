@@ -1,0 +1,34 @@
+"""Independently callable performance calculations."""
+
+from .inputs import validate_performance_returns as validate_performance_returns
+from .inputs import align_performance_pair as align_performance_pair
+from .wealth import compute_wealth_index as compute_wealth_index
+from .periods import aggregate_period_returns as aggregate_period_returns
+from .relative import compute_relative_performance as compute_relative_performance
+from .relative import compute_relative_period_performance as compute_relative_period_performance
+from .windows import _performance_calendar_date as _performance_calendar_date
+from .windows import _performance_window_start as _performance_window_start
+from .windows import resolve_performance_windows as resolve_performance_windows
+from .windows import compute_absolute_performance as compute_absolute_performance
+from .windows import compute_relative_window_performance as compute_relative_window_performance
+from .rolling import compute_rolling_performance as compute_rolling_performance
+from .rolling import compute_rolling_relative_performance as compute_rolling_relative_performance
+from .rolling import summarize_rolling_outperformance as summarize_rolling_outperformance
+from .capture import compute_market_capture as compute_market_capture
+from .risk_adjusted import align_performance_risk_free as align_performance_risk_free
+from .risk_adjusted import assess_performance_rf_coverage as assess_performance_rf_coverage
+from .risk_adjusted import compute_risk_adjusted_performance as compute_risk_adjusted_performance
+from .contributions import compute_security_contributions as compute_security_contributions
+from .contributions import link_security_contributions as link_security_contributions
+from .contributions import aggregate_sector_contributions as aggregate_sector_contributions
+from .contributions import rank_linked_security_contributions as rank_linked_security_contributions
+from .return_basis import compute_return_basis_windows as compute_return_basis_windows
+from .summaries import build_performance_summary as build_performance_summary
+from .summaries import build_risk_adjusted_summary as build_risk_adjusted_summary
+from .distributions import prepare_rolling_relative_visuals as prepare_rolling_relative_visuals
+
+__all__ = ['validate_performance_returns', 'align_performance_pair', 'compute_wealth_index', 'aggregate_period_returns', 'compute_relative_performance', 'compute_relative_period_performance', 'resolve_performance_windows', 'compute_absolute_performance', 'compute_relative_window_performance', 'compute_rolling_performance', 'compute_rolling_relative_performance', 'summarize_rolling_outperformance', 'compute_market_capture', 'align_performance_risk_free', 'assess_performance_rf_coverage', 'compute_risk_adjusted_performance', 'compute_security_contributions', 'link_security_contributions', 'aggregate_sector_contributions', 'rank_linked_security_contributions', 'compute_return_basis_windows', 'build_performance_summary', 'build_risk_adjusted_summary', 'prepare_rolling_relative_visuals']
+
+from .api import run as run
+
+__all__.append("run")
