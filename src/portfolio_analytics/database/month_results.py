@@ -3,7 +3,8 @@
 from datetime import datetime, timezone
 import hashlib
 import json
-from pathlib import Path
+import os
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 import duckdb
 import pandas as pd
@@ -13,6 +14,34 @@ from .results import identifier, storage_frame
 
 def utc_now():
     return datetime.now(timezone.utc).isoformat()
+
+
+SOURCE_DATABASE_ENV = "PORTFOLIO_SOURCE_DATABASE"
+
+
+def resolve_source_database(stored, database):
+    """Locate a completed build's shared source database without changing its record.
+
+    A build records the absolute source path used on the machine that wrote it. When the
+    databases are copied elsewhere, use an explicit PORTFOLIO_SOURCE_DATABASE override,
+    else the recorded path, else a file with the same name next to the month database.
+    """
+    override = os.environ.get(SOURCE_DATABASE_ENV)
+    if override:
+        path = Path(override)
+        if not path.is_file():
+            raise FileNotFoundError(f"{SOURCE_DATABASE_ENV} does not point to an existing file.")
+        return path
+    stored = str(stored)
+    if Path(stored).is_file():
+        return Path(stored)
+    name = (PureWindowsPath(stored) if "\\" in stored else PurePosixPath(stored)).name
+    sibling = Path(database).resolve().parent / name
+    if name and sibling.is_file():
+        return sibling
+    raise FileNotFoundError(
+        "The shared source database for this build was not found. Place it next to the "
+        f"month database or set {SOURCE_DATABASE_ENV}.")
 
 
 def result_table(build_id, domain, name, scope="PERIOD"):
@@ -254,7 +283,7 @@ def read_month_history(database, build_id, window, domain, output_name, *, date_
         if any(key in json.loads(record[1]) for key in ("period_id", "window_id", "report_window")):
             raise ValueError("A historical period-specific table cannot be reused as a new interval history.")
         definition = json.loads(row[0])
-        source = build[1]
-    with duckdb.connect(source, read_only=True) as db:
+        source = resolve_source_database(build[1], database)
+    with duckdb.connect(str(source), read_only=True) as db:
         return db.execute(f"SELECT * FROM {qualified_result(db, record[0])} WHERE {identifier(date_column)} BETWEEN ? AND ?",
             [definition["first_return_date"], definition["last_return_date"]]).df()

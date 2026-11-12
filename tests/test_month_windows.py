@@ -335,3 +335,37 @@ def test_scaling_does_not_hide_original_design_condition_failure():
         tiny=np.linspace(-1e-12, 1e-12, 100), excess_return=np.linspace(-0.01, 0.01, 100)))
     with pytest.raises(ValueError, match="condition-number"):
         fit_period_ols(source, factor_columns=("tiny",), model_id="test")
+
+
+def test_source_database_uses_recorded_path_when_present(tmp_path, monkeypatch):
+    from portfolio_analytics.database.month_results import SOURCE_DATABASE_ENV, resolve_source_database
+    monkeypatch.delenv(SOURCE_DATABASE_ENV, raising=False)
+    source = tmp_path / "elsewhere" / "analytics.duckdb"
+    source.parent.mkdir()
+    source.touch()
+    assert resolve_source_database(str(source), tmp_path / "month_windows.duckdb") == source
+
+
+def test_source_database_falls_back_next_to_month_database(tmp_path, monkeypatch):
+    from portfolio_analytics.database.month_results import SOURCE_DATABASE_ENV, resolve_source_database
+    monkeypatch.delenv(SOURCE_DATABASE_ENV, raising=False)
+    (tmp_path / "analytics.duckdb").touch()
+    recorded = r"Z:\Missing\Machine\local\analytics_outputs\analytics.duckdb"
+    resolved = resolve_source_database(recorded, tmp_path / "month_windows.duckdb")
+    assert resolved == (tmp_path / "analytics.duckdb").resolve()
+
+
+def test_source_database_override_and_missing_file(tmp_path, monkeypatch):
+    from portfolio_analytics.database.month_results import SOURCE_DATABASE_ENV, resolve_source_database
+    override = tmp_path / "shared.duckdb"
+    override.touch()
+    monkeypatch.setenv(SOURCE_DATABASE_ENV, str(override))
+    assert resolve_source_database(r"Z:\gone\analytics.duckdb", tmp_path / "m.duckdb") == override
+    monkeypatch.setenv(SOURCE_DATABASE_ENV, str(tmp_path / "absent.duckdb"))
+    with pytest.raises(FileNotFoundError):
+        resolve_source_database(r"Z:\gone\analytics.duckdb", tmp_path / "m.duckdb")
+    monkeypatch.delenv(SOURCE_DATABASE_ENV)
+    recorded = r"Z:\Private\Path\analytics.duckdb"
+    with pytest.raises(FileNotFoundError) as error:
+        resolve_source_database(recorded, tmp_path / "m.duckdb")
+    assert "Private" not in str(error.value)
