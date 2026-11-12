@@ -1,0 +1,45 @@
+[client]
+disableDataExport = true
+toolbarMode = "minimal"
+
+[server]
+enableStaticServing = true
+
+[theme]
+base = "light"
+primaryColor = "#0D9488"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F7F9FC"
+textColor = "#0F2A47"
+font = "Roboto"
+headingFont = "Montserrat"
+baseFontSize = 15
+headingFontSizes = ["40px", "28px", "20px", "18px", "16px", "14px"]
+headingFontWeights = [600, 600, 600, 500, 500, 500]
+metricValueFontSize = "2rem"
+metricValueFontWeight = 600
+borderColor = "#DFE6ED"
+baseRadius = "0.65rem"
+buttonRadius = "0.4rem"
+showWidgetBorder = true
+showSidebarBorder = true
+chartCategoricalColors = ["#0D9488", "#D97706", "#0F2A47", "#94A3B8"]
+dataframeHeaderBackgroundColor = "#F7F9FC"
+dataframeHeaderTextColor = "#0F2A47"
+paddingTop = "2rem"
+paddingBottom = "3rem"
+
+[[theme.fontFaces]]
+family = "Roboto"
+url = "app/static/fonts/Roboto.ttf"
+weight = "100 900"
+
+[[theme.fontFaces]]
+family = "Montserrat"
+url = "app/static/fonts/Montserrat.ttf"
+weight = "100 900"
+
+[theme.sidebar]
+backgroundColor = "#F7F9FC"
+secondaryBackgroundColor = "#FFFFFF"
+paddingTop = "2rem"
