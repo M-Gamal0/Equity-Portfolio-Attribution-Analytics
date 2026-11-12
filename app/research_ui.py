@@ -12,10 +12,13 @@ import streamlit as st
 from chart_renderer import render_chart
 
 from portfolio_analytics.common.month_windows import MonthWindow
+from portfolio_analytics.database.month_bundles import BundleReader, bundle_source_from_environment
 from portfolio_analytics.database.month_results import list_month_builds, read_month_result, read_month_history
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DATABASE = ROOT / "local/analytics_outputs/month_windows.duckdb"
+# Hosted deployments read exported bundles (local folder or hf://datasets/owner/name).
+BUNDLE_SOURCE = bundle_source_from_environment()
 SERIES = ["Active portfolio", "Benchmark"]
 COLORS = ["#0D9488", "#D97706"]
 FACTOR_NAMES = {"mkt_rf": "Market", "smb": "Size", "hml": "Value", "rmw": "Profitability", "cma": "Investment", "mom": "Momentum", "intercept": "Daily alpha"}
@@ -152,13 +155,27 @@ def public_security_frame(frame, ctx=None):
     return frame.drop(columns=[c for c in ("security_id", "other_security_id", "security_key", "category_key") if c in frame]).reset_index(drop=True)
 
 
+@st.cache_resource(show_spinner=False)
+def bundle_reader(source):
+    return BundleReader(source, revision=os.environ.get("PORTFOLIO_BUNDLE_REVISION") or None)
+
+
+def _bundle(path):
+    """The bundle reader when this path is the configured bundle source, else None."""
+    return bundle_reader(path) if BUNDLE_SOURCE and path == BUNDLE_SOURCE else None
+
+
 @st.cache_data(ttl=60, max_entries=4, show_spinner=False)
 def builds(path):
-    return list_month_builds(path)
+    reader = _bundle(path)
+    return reader.builds() if reader else list_month_builds(path)
 
 
 @st.cache_data(max_entries=4, show_spinner=False)
 def metadata(path, build_id):
+    reader = _bundle(path)
+    if reader:
+        return reader.metadata(build_id)
     with duckdb.connect(path, read_only=True) as db:
         catalog = db.execute("SELECT * FROM control.month_outputs WHERE build_id=?", [build_id]).df()
         intervals = db.execute("SELECT interval_id,definition_json,validation_json FROM control.month_intervals WHERE build_id=? AND status='COMPLETED'", [build_id]).df()
@@ -168,13 +185,20 @@ def metadata(path, build_id):
 @st.cache_data(max_entries=128, show_spinner=False)
 def result(path, build_id, interval_id, domain, name):
     start, end = interval_id.split("_")
-    return read_month_result(path, build_id, MonthWindow(pd.Period(start, "M"), pd.Period(end, "M")), domain, name)
+    window = MonthWindow(pd.Period(start, "M"), pd.Period(end, "M"))
+    reader = _bundle(path)
+    if reader:
+        return reader.result(build_id, window, domain, name)
+    return read_month_result(path, build_id, window, domain, name)
 
 
 @st.cache_data(max_entries=16, show_spinner=False)
 def history(path, build_id, interval_id, domain, name, date_column="date"):
     start, end = interval_id.split("_")
     window = MonthWindow(pd.Period(start, "M"), pd.Period(end, "M"))
+    reader = _bundle(path)
+    if reader:
+        return reader.history(build_id, window, domain, name, date_column=date_column)
     return read_month_history(path, build_id, window, domain, name, date_column=date_column)
 
 
@@ -206,7 +230,7 @@ class ResearchContext:
 
 def select_context():
     """Global widgets live in the entry point, so page navigation retains edits."""
-    path = os.environ.get("PORTFOLIO_MONTH_DATABASE", str(DEFAULT_DATABASE))
+    path = BUNDLE_SOURCE or os.environ.get("PORTFOLIO_MONTH_DATABASE", str(DEFAULT_DATABASE))
     try:
         available = builds(path)
         if available.empty:
@@ -214,7 +238,7 @@ def select_context():
             st.stop()
         record = available.iloc[0]
         catalog, intervals = metadata(path, record.build_id)
-    except (OSError, duckdb.Error) as exc:
+    except (OSError, ValueError, duckdb.Error) as exc:
         st.error(f"Saved month results could not be opened: {exc}")
         st.stop()
     if "month_window" not in st.session_state:
