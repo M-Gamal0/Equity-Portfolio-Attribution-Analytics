@@ -1,24 +1,8 @@
 # Using the Python package with your own data
 
-## November 12 API and source-publication checkpoint
+The same analytics package serves the private research case study, the public-data demo and your own DataFrames. No research notebook or private snapshot is required by the mathematical functions or domain APIs. Python 3.13+ is required; install from the repository with `python -m pip install .`. The optional `demo` extra adds Yahoo acquisition; the `app` extra adds Streamlit. The supported DuckDB range is `>=1.5.6,<2`, because DuckDB 2.0 fails the package's storage tests.
 
-Current accepted private build is `months_d47dc24f10c516ee57e6` at `local/analytics_outputs/month_windows.duckdb`; 5,995 selections and 47,960 saved validations passed. The 28 missing-CAGR intervals are restored, other result-value fingerprints match, and v1 remains at `month_windows_v1_backup_20261109.duckdb`. No new population or repair is queued. MIT is selected; DuckDB 2.x work remains deferred. Numerical/app evidence below retains its recorded dates; no numerical test or browser review was rerun for November 12 documentation maintenance.
-
-The contracts, domain APIs and examples below remain unchanged. Source distribution uses MIT while data-source terms remain separate. Inline synthetic fixtures are selected; real provider responses/snapshots/databases are not. The current commit plan's path/format guards protect staging and outgoing history, including unreviewed JSON/TXT extracts. No new public helper module, API change or dependency change was needed. Build the final corrected artifact from the selected committed tree; old wheels retain their build-specific scope.
-
-## Complete-month adapter versus general-purpose CAGR API
-
-The complete-month pipeline now applies an explicit >=12-month eligibility policy, relaxing only its effective kernel day gate when trading endpoints span fewer than 365 days. It does not change the annualization exponent: `365.25 / actual_days`. The original `compute_absolute_performance` and relative kernel defaults still require 365 days for arbitrary caller-supplied windows; genuinely short periods are not globally annualized.
-
-The month outputs save policy metadata and the monthly validator checks metrics/provenance/formulas. The new tests pass, including 363/364-day years, shorter/invalid selections, unavailable states and unchanged 13/60-month metrics. The owner-controlled private refresh is separate from API use and the fixed public 60-month values remain unchanged. Older MIT wheel artifacts do not yet include this fix; use current source pending the final release build.
-
-## Publication and validation checkpoint
-
-API contracts and mathematical behavior below are unchanged. Original code uses MIT; provider datasets and bundled third-party notices remain separate. DuckDB 2.x work is deferred; retain the tested 1.x requirement.
-
-[COMMIT_PLAN.md](COMMIT_PLAN.md) publishes the reusable modules and examples through 90 Git Bash section commits, with 12 visible historical/legacy holds and no generated/private data. Required validators, current financial tests and AST provenance remain included. The prior 91-test result included two held legacy tests; final committed-tree checks must record their actual count. No API/code, data, package environment or Git history was changed during this progress-record synchronization.
-
-The same analytics package serves the private research case study, the Yahoo public demonstration and caller-supplied DataFrames. No research notebook or private snapshot is required by the mathematical functions or domain APIs. Python 3.13+ is required; install from this checkout with `python -m pip install .`. The optional `demo` extra adds Yahoo acquisition; the `app` extra adds Streamlit. The supported DuckDB dependency is `>=1.5.6,<2`: a clean installation with 2.0 failed existing storage tests on November 9, 2026.
+**CAGR eligibility:** the general-purpose `compute_absolute_performance` and relative-performance functions annualize only windows of at least 365 calendar days, using the exponent `365.25 / actual_days`. The complete-month pipeline additionally treats any window of 12 or more complete months as eligible, because trading-day endpoints can span 363 or 364 days for a full year. The exponent is unchanged.
 
 ## Smallest working example
 
@@ -68,4 +52,4 @@ The factors domain accepts additional security/holdings histories for optional s
 
 Direct domain calls do not save files or start Streamlit. The runner/snapshot/result-writer APIs handle explicit persistence separately. For the complete public workflow, follow [the public-demo setup](../examples/public_demo/README.md): `build`, `run`, and optionally `prepare-app`. The latter prepares one saved fixed five-year view; app interactions only read it. Generated datasets and database files are not bundled for publication.
 
-Current constituents/caps applied retrospectively are an accepted demo convention, not a point-in-time investment backtest. Exact replay requires the frozen source cache, implementation and recorded software versions; live refresh may differ. Market-data terms and bundled third-party notices are separate from the [MIT licence](../LICENSE) for this project's original code. See [release readiness](RELEASE_READINESS.md) for remaining checks.
+Current constituents/caps applied retrospectively are an accepted demo convention, not a point-in-time investment backtest. Exact replay requires the frozen source cache, implementation and recorded software versions; live refresh may differ. Market-data terms and bundled third-party notices are separate from the [MIT licence](../LICENSE) for this project's original code.

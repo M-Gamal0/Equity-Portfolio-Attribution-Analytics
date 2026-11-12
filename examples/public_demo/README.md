@@ -1,52 +1,18 @@
 # Try the analytics package with public market data
 
-## November 12 publication and artifact checkpoint
+This guide builds a fully reproducible example of the analytics package using free public data: the current Nasdaq-100 list from Nasdaq, prices and market caps from Yahoo Finance, and daily Fama-French factors from the Kenneth French Data Library. You download the data yourself; no private files, research notebooks or databases are needed.
 
-Current accepted private build is `months_d47dc24f10c516ee57e6` at `local/analytics_outputs/month_windows.duckdb`; 5,995 selections and 47,960 saved validations passed. The 28 missing-CAGR intervals are restored, other result-value fingerprints match, and v1 remains at `month_windows_v1_backup_20261109.duckdb`. No new population or repair is queued. MIT is selected; DuckDB 2.x work remains deferred. Numerical/app evidence below retains its recorded dates; no numerical test or browser review was rerun for November 12 documentation maintenance.
-
-This public demo still uses only its own Yahoo/Nasdaq/French inputs and saved view. Public users obtain data locally through the loader; private inputs are not fallback sources, and downloaded datasets are not bundled in the Git source selection. Publish through [the guarded Git Bash plan](../../docs/COMMIT_PLAN.md), with manual review before every push. JSON/TXT are restricted to exact provenance/notice exceptions; no source response or dataset belongs in Git.
-
-The previous MIT wheel is a recorded pre-CAGR-fix artifact, not a current corrected release. Use the checkout for current source, then rebuild from the final selected tree. Hosting has not been configured; its saved-data access must be arranged separately outside Git. No data acquisition, package installation or server action was performed by this update.
-
-## CAGR source correction after the recorded MIT wheel build
-
-The current source includes a complete-month eligibility correction for 12-month CAGR. Your fixed public five-year numerical results are unaffected; no public-data refresh is required for this issue. The original arbitrary-window kernel rule and actual-day exponent are preserved, and the monthly adapter saves/verifies its explicit policy.
-
-The wheel in `dist/mit-20261109/` was built **before** this correction. It remains preserved/tested for its recorded build but is not a wheel containing the fix. Use the editable checkout installation above for current code, or rebuild the final wheel from the final committed source. The latest full source suite is 109 passed with one optional prepared-data integration skipped. No new release/upload or private population was performed.
-
-## Source publication is sectional — November 9, 2026
-
-The owner is publishing source through the [90-step Git Bash plan](../../docs/COMMIT_PLAN.md), with manual review before each push. Twelve optional history/legacy files and all generated/private data categories are excluded. Your own Yahoo/Nasdaq/French inputs are still fetched locally; neither original research results nor demo databases are bundled in Git.
-
-MIT is selected, DuckDB 2.x work stays deferred, and the current APIs/construction/viewer are unchanged. The earlier 91-test total includes two held legacy tests; the chosen public tree will have its own measured test count. Existing MIT artifacts are verified for their recorded build and remain preserved; final release artifacts should be rebuilt from the committed documentation/source selection. No preparation, acquisition, installation, app restart or Git action was executed during this progress-record update.
-
-This example needs no Sharadar files, research notebooks, private database or Streamlit app. It creates a **real-public-data-derived demonstration**, not a wholly synthetic dataset. Small synthetic fixtures are used only in the automated tests.
-
-## Current status and release scope
-
-Current verified snapshot: `4b366f532e109d99`, with `demo_active20` (20 x 5%) and `demo_benchmark50` (50 x 2%), quarterly resets. The expanded active basket still covers four sectors. Latest recorded portable suite: 91 passed, one optional prepared-data integration skipped and passed separately; updated installed-wheel checks passed. See [SAMPLE_OUTPUT.md](SAMPLE_OUTPUT.md) for observed counts, not a promise that a fresh live fetch returns the same basket or bytes.
-
-The implementation is validated locally; final publication checks remain in [release readiness](../../docs/RELEASE_READINESS.md). Code licence/metadata, the intended public Git contents and an exact public-only checkout test still need review. No PyPI upload or hosted deployment is claimed. Keep the frozen cache for offline continuation; [cleanup candidates](../../docs/CLEANUP_CANDIDATES.md) are proposals only. This documentation update changes no data or app visuals.
+The result is a **real-public-data-derived demonstration**, not a synthetic dataset and not an investment backtest. Small synthetic fixtures are used only in the automated tests. [SAMPLE_OUTPUT.md](SAMPLE_OUTPUT.md) shows the counts and reconciliation results from one verified build; a fresh download can select a different basket because constituents and market caps change.
 
 ## Install
 
-Python **3.13+** is required. From a downloaded/cloned checkout, create and activate a virtual environment, then:
+Python **3.13+** is required. From a clone of the repository, create and activate a virtual environment, then:
 
 ```bash
 python -m pip install -e ".[demo]"
 ```
 
-Alternatively, install a locally built/downloaded release wheel:
-
-The MIT-licensed wheel rebuilt and installed/tested on November 9 is under `dist/mit-20261109/`. The older top-level `dist/` wheel was retained and predates the DuckDB compatibility bound; use the rebuilt wheel or checkout installation above. No artifact has been uploaded. Original code is covered by the [MIT licence](../../LICENSE); data-source terms and third-party notices remain separate. Verification is tracked in [release readiness](../../docs/RELEASE_READINESS.md).
-
-```bash
-python -m pip install "./dist/mit-20261109/portfolio_analytics-0.1.0-py3-none-any.whl[demo]"
-```
-
-The wheel is built and tested locally; no PyPI release has been uploaded. Do not assume an identically named package currently on PyPI is this project. The `demo` extra adds `yfinance`; the base package can still consume your own standardized DataFrames without a Yahoo dependency.
-
-The supported DuckDB range is `>=1.5.6,<2`. A November 9 clean-install check found that DuckDB 2.0 fails existing storage/readback tests; the package metadata now prevents that installation. Your original research environment and saved databases are unchanged. For the input contracts and a small example using your own DataFrame, see the [Python API guide](../../docs/PYTHON_API_GUIDE.md).
+The `demo` extra adds `yfinance`; the base package can still analyse your own standardized DataFrames without it. To build a wheel instead, run `python -m pip install build` and `python -m build`, then install the wheel from `dist/`. The supported DuckDB range is `>=1.5.6,<2`, because DuckDB 2.0 fails the package's storage tests. For the input contracts and an own-DataFrame example, see the [Python API guide](../../docs/PYTHON_API_GUIDE.md). Original code is covered by the [MIT licence](../../LICENSE); data-source terms and third-party notices remain separate.
 
 ## Build and run
 
@@ -178,4 +144,4 @@ The distributable package contains the recipe, not downloaded Yahoo prices, Fren
 | New software gives a different snapshot ID | Software versions and Parquet serialization may change content hashes even when construction and reconciled observations agree. Preserve both manifests; do not overwrite earlier snapshots or require the example's saved ID as your own output. |
 | Port 8503 is occupied | Choose another free port, e.g. `--server.port 8504`. No financial rerun is needed to change a server port. |
 
-The default tests use synthetic fixtures and no market-data downloads. The optional prepared-public-data integration checks the real-data viewer separately. On November 9 the clean public-only installation passed 91 tests (one optional integration skipped), then that integration passed separately against a newly prepared public view. All six domains completed, including full factor preparation. These are local checks; automated GitHub execution and final publication remain separate release steps.
+The default tests use synthetic fixtures and no market-data downloads. The optional prepared-public-data integration checks the real-data viewer separately and needs a prepared workspace; GitHub Actions runs the portable tests on every push.
