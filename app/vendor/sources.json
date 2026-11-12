@@ -1,0 +1,44 @@
+{
+  "vega.min.js": {
+    "package": "vega",
+    "version": "6.4.0",
+    "source": "https://registry.npmjs.org/vega/-/vega-6.4.0.tgz",
+    "sha256": "8f6a3587cf8d4f42c7e08120e3eb05d067e746d554e39d2dcf52acc0bd5ba28f",
+    "bytes": 521123
+  },
+  "vega-LICENSE.txt": {
+    "package": "vega",
+    "version": "6.4.0",
+    "source": "https://registry.npmjs.org/vega/-/vega-6.4.0.tgz",
+    "sha256": "63727832aaf62004a2b249c933e327f3c90caf49e41a72f4bf436edf632cbda8",
+    "bytes": 1533
+  },
+  "vega-lite.min.js": {
+    "package": "vega-lite",
+    "version": "6.5.0",
+    "source": "https://registry.npmjs.org/vega-lite/-/vega-lite-6.5.0.tgz",
+    "sha256": "83e215e84e308ee8688fa6503ba0f1cf8a3c05c0d61df2841a0b92bf86809e00",
+    "bytes": 257954
+  },
+  "vega-lite-LICENSE.txt": {
+    "package": "vega-lite",
+    "version": "6.5.0",
+    "source": "https://registry.npmjs.org/vega-lite/-/vega-lite-6.5.0.tgz",
+    "sha256": "f618900fd0d64046963b29f40590cdd1e341a2f41449f99110d82fd81fea808c",
+    "bytes": 1529
+  },
+  "vega-embed.min.js": {
+    "package": "vega-embed",
+    "version": "7.3.0",
+    "source": "https://registry.npmjs.org/vega-embed/-/vega-embed-7.3.0.tgz",
+    "sha256": "b1455caba2fb1a72fb46025ba0ba1316e2dbc7f0dd40a3f6040172bf9c08ba91",
+    "bytes": 60298
+  },
+  "vega-embed-LICENSE.txt": {
+    "package": "vega-embed",
+    "version": "7.3.0",
+    "source": "https://registry.npmjs.org/vega-embed/-/vega-embed-7.3.0.tgz",
+    "sha256": "32df67148f0fc3db0eb9e263a7b75d07f1eb14c61955005a4a39c6918d10d137",
+    "bytes": 1528
+  }
+}
