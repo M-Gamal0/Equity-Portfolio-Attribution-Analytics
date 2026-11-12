@@ -10,6 +10,13 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Generated Python distribution artifacts
+/build/
+/dist/
 
 # Private source data
 /source/
@@ -17,10 +24,42 @@ __pycache__/
 # Private research workspace
 /local/
 
+# Generated public-source demo downloads, snapshots and analysis results
+/demo_workspace/
+
+# Generated reports/results (publish reviewed examples explicitly instead)
+/reports/
+
+# Binary data extracts, including accidental copies outside ignored workspaces
+*.parquet
+*.feather
+*.arrow
+*.pkl
+*.pickle
+
+# Tabular/raw extracts and compressed source deliveries (code examples stay inline)
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.xlsb
+*.sqlite
+*.sqlite3
+*.zip
+*.7z
+*.tar
+*.gz
+
+# Temporary private design references (original PDF and saved web pages)
+/For the Desgines Ideas and will be deleted/
+
 # Database files
 *.duckdb
 *.duckdb.wal
+*.duckdb.tmp/
 *.db
+*.db-wal
+*.db-shm
 
 # Jupyter checkpoints and notebook files
 .ipynb_checkpoints/
@@ -32,6 +71,7 @@ __pycache__/
 !.env.example
 *.pem
 *.key
+/.streamlit/secrets.toml
 
 # Editor and operating system files
 .vscode/
