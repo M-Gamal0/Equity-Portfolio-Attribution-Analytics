@@ -8,7 +8,7 @@ import streamlit as st
 
 from portfolio_analytics.demo.view import verify_demo_view
 from research_ui import (ROOT, SERIES, COLORS, ResearchContext, metadata, detailed, methodology,
-                         growth_frame, line_chart, pct, security_labels, display_table)
+                         growth_frame, line_chart, pct, security_labels, display_table, report_unavailable)
 from comparison import render_comparison
 from overview_details import risk_headlines, sector_chart
 from performance_details import return_comparisons, ratio_comparisons, monthly_chart, annual_chart
@@ -171,7 +171,7 @@ def main():
     try:
         ctx = load_demo_context(str(workspace), pointer.stat().st_mtime_ns)
     except (OSError, ValueError, KeyError, RuntimeError, duckdb.Error) as exc:
-        st.error(f"The public demo view could not be verified: {exc}")
+        report_unavailable("The public demo view could not be verified. Details are in the terminal running Streamlit.", exc)
         return
     st.session_state.research_context = ctx
     sections = {"Overview": render_overview, "Performance": render_performance, "Attribution": render_attribution,

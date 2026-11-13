@@ -2,7 +2,7 @@
 import pandas as pd
 import streamlit as st
 
-from research_ui import SERIES, context, growth_frame, line_chart, pct, detailed, methodology
+from research_ui import SERIES, context, growth_frame, line_chart, pct, detailed, methodology, report_unavailable
 from performance_details import (return_comparisons, ratio_comparisons, monthly_chart, annual_chart,
                                  drawdown_comparisons, rolling_chart, capture_chart, supporting_data)
 
@@ -18,7 +18,7 @@ try:
     risk = ctx.load("risk", "risk_absolute_summary").set_index("portfolio_id")
     periods = ctx.load("performance", "performance_period")
 except (KeyError, ValueError, OSError) as exc:
-    st.error(f"Selected-period results could not be loaded: {exc}")
+    report_unavailable("Selected-period results are temporarily unavailable. Please try again later.", exc)
     st.stop()
 
 with st.container(horizontal=True):

@@ -1,6 +1,8 @@
 [client]
 disableDataExport = true
 toolbarMode = "minimal"
+# Visitors see generic error messages; full details go to the server log only.
+showErrorDetails = "none"
 
 [server]
 enableStaticServing = true

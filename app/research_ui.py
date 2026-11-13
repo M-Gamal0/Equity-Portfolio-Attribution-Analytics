@@ -1,6 +1,7 @@
 """Presentation helpers only. Never invoke an analytics runner from this module."""
 import calendar
 import json
+import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -30,6 +31,16 @@ def _configured_bundle_source():
 
 BUNDLE_SOURCE = _configured_bundle_source()
 SERIES = ["Active portfolio", "Benchmark"]
+LOGGER = logging.getLogger("portfolio_dashboard")
+
+
+def report_unavailable(message, exc, *, warning=False):
+    """Show visitors a generic message; the full error goes only to the server log.
+
+    Error text from storage clients can include file locations, so it is never shown.
+    """
+    LOGGER.error(message, exc_info=exc)
+    (st.warning if warning else st.error)(message)
 COLORS = ["#0D9488", "#D97706"]
 FACTOR_NAMES = {"mkt_rf": "Market", "smb": "Size", "hml": "Value", "rmw": "Profitability", "cma": "Investment", "mom": "Momentum", "intercept": "Daily alpha"}
 
@@ -249,7 +260,7 @@ def select_context():
         record = available.iloc[0]
         catalog, intervals = metadata(path, record.build_id)
     except (OSError, ValueError, duckdb.Error) as exc:
-        st.error(f"Saved month results could not be opened: {exc}")
+        report_unavailable("Saved results are temporarily unavailable. Please try again later.", exc)
         st.stop()
     if "month_window" not in st.session_state:
         st.session_state.month_window = "2016-10_2026-09"
@@ -342,7 +353,7 @@ def detailed(ctx, domain):
     try:
         frame = ctx.history(domain, name, date) if scope == "SOURCE_REFERENCE" else ctx.load(domain, name)
     except (OSError, ValueError, KeyError, duckdb.Error) as exc:
-        st.warning(f"This saved table could not be opened: {exc}")
+        report_unavailable("This saved table is temporarily unavailable.", exc, warning=True)
         return
     for field in ("portfolio_id", "target_id", "weight_basis", "linking_method", "sector", "security_id"):
         if field in frame and frame[field].nunique() > 1:
