@@ -82,3 +82,30 @@ def test_tampered_or_incomplete_bundles_are_refused(tmp_path):
     assert BundleReader(trial, allow_incomplete=True).manifest()["interval_count"] == 1
     with pytest.raises(FileExistsError):
         export_month_bundles(months, trial, progress=lambda message: None)
+
+
+def test_packed_bundles_read_identically_with_range_reads(tmp_path):
+    from portfolio_analytics.database.month_bundles import pack_month_bundles, verify_packed_files
+    months, _ = build_databases(tmp_path)
+    exported = tmp_path / "bundles"
+    export_month_bundles(months, exported, core_limit_bytes=0, progress=lambda message: None)
+    packed = tmp_path / "packs"
+    manifest = pack_month_bundles(exported, packed, pack_bytes=2_000, progress=lambda message: None)
+    assert len(manifest["pack_files"]) > 1  # tiny packs force several pack files
+    assert sorted(p.name for p in packed.iterdir()) == ["core.zip", "manifest.json", "packs"]
+    verify_packed_files(packed, progress=lambda message: None)
+    assert verify_bundles(months, packed, [w["interval_id"] for w in WINDOWS], progress=lambda message: None) == []
+
+    with pytest.raises(ValueError, match="already packed"):
+        pack_month_bundles(packed, tmp_path / "again", progress=lambda message: None)
+    trial = tmp_path / "trial"
+    export_month_bundles(months, trial, interval_limit=1, progress=lambda message: None)
+    with pytest.raises(ValueError, match="complete"):
+        pack_month_bundles(trial, tmp_path / "trial_packs", progress=lambda message: None)
+
+    first_pack = next((packed / "packs").iterdir())
+    data = bytearray(first_pack.read_bytes())
+    data[0] ^= 0xFF
+    first_pack.write_bytes(bytes(data))
+    with pytest.raises(ValueError, match="checksum"):
+        verify_packed_files(packed, progress=lambda message: None)

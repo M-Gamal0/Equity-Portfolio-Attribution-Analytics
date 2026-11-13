@@ -244,6 +244,53 @@ def export_month_bundles(database, output, *, build_id=None, core_limit_bytes=3_
     return manifest
 
 
+def pack_month_bundles(source, output, *, pack_bytes=500_000_000, progress=print):
+    """Combine exported bundle files into a few large packs, byte for byte.
+
+    Hosting services throttle uploads of thousands of small files. Packing keeps each
+    original file intact at a recorded offset, so a reader still fetches exactly one file
+    per request, using an HTTP range request. Checksums of the original files are kept.
+    """
+    source, root = Path(source), Path(output)
+    manifest = json.loads((source / MANIFEST).read_text(encoding="utf-8"))
+    if not manifest.get("complete"):
+        raise ValueError("Only complete exports can be packed.")
+    if manifest.get("packed"):
+        raise ValueError("These bundles are already packed.")
+    if root.exists() and any(root.iterdir()):
+        raise FileExistsError("The output folder must be empty; bundles are never overwritten.")
+    (root / "packs").mkdir(parents=True, exist_ok=True)
+    (root / CORE).write_bytes((source / CORE).read_bytes())
+    packed, pack_files = {}, {}
+    pack_number, handle, digest, offset = -1, None, None, 0
+
+    def close_pack():
+        if handle is not None:
+            handle.close()
+            pack_files[name] = digest.hexdigest()
+
+    members = sorted(r for r in manifest["files"] if r != CORE)
+    for relative in members:
+        data = (source / relative).read_bytes()
+        if _sha256(data) != manifest["files"][relative]:
+            raise ValueError(f"Source bundle file failed its checksum: {relative}")
+        if handle is None or offset + len(data) > pack_bytes and offset > 0:
+            close_pack()
+            pack_number += 1
+            name = f"packs/pack-{pack_number:03d}.bin"
+            handle, digest, offset = open(root / name, "wb"), hashlib.sha256(), 0
+        handle.write(data)
+        digest.update(data)
+        packed[relative] = [name, offset, len(data)]
+        offset += len(data)
+    close_pack()
+    manifest["packed"] = packed
+    manifest["pack_files"] = pack_files
+    (root / MANIFEST).write_text(json.dumps(manifest, indent=1, sort_keys=True), encoding="utf-8")
+    progress(f"packed {len(packed)} files into {len(pack_files)} packs")
+    return manifest
+
+
 # --------------------------------------------------------------------------- reader
 
 class BundleReader:
@@ -273,16 +320,45 @@ class BundleReader:
                 self._files.popitem(last=False)
         return data
 
-    def fetch(self, relative: str) -> bytes:
-        if self.source.startswith("hf://datasets/"):
+    @property
+    def _remote(self) -> bool:
+        return self.source.startswith("hf://datasets/")
+
+    def _repo(self) -> str:
+        return self.source[len("hf://datasets/"):].strip("/")
+
+    def _read_whole(self, relative: str) -> bytes:
+        if self._remote:
             from huggingface_hub import hf_hub_download
-            repo = self.source[len("hf://datasets/"):].strip("/")
-            path = hf_hub_download(repo_id=repo, filename=relative, repo_type="dataset",
+            path = hf_hub_download(repo_id=self._repo(), filename=relative, repo_type="dataset",
                                    revision=self.revision)
-            data = Path(path).read_bytes()
+            return Path(path).read_bytes()
+        return (Path(self.source) / relative).read_bytes()
+
+    def _read_range(self, pack: str, offset: int, length: int) -> bytes:
+        """Read one packed file with a single HTTP range request (or a local seek)."""
+        if self._remote:
+            from huggingface_hub import HfFileSystem
+            with self._lock:
+                if getattr(self, "_fs", None) is None:
+                    self._fs = HfFileSystem()
+            revision = f"@{self.revision}" if self.revision else ""
+            data = self._fs.cat_file(f"datasets/{self._repo()}{revision}/{pack}",
+                                     start=offset, end=offset + length)
         else:
-            data = (Path(self.source) / relative).read_bytes()
-        expected = self.manifest()["files"].get(relative) if relative != MANIFEST else None
+            with open(Path(self.source) / pack, "rb") as handle:
+                handle.seek(offset)
+                data = handle.read(length)
+        if len(data) != length:
+            raise ValueError(f"Short read from bundle pack: {pack}")
+        return data
+
+    def fetch(self, relative: str) -> bytes:
+        if relative == MANIFEST:
+            return self._read_whole(relative)
+        location = self.manifest().get("packed", {}).get(relative)
+        data = self._read_range(*location) if location else self._read_whole(relative)
+        expected = self.manifest()["files"].get(relative)
         if expected is not None and _sha256(data) != expected:
             raise ValueError(f"Bundle file failed its checksum: {relative}")
         return data
@@ -387,6 +463,22 @@ class BundleReader:
                                 [definition["first_return_date"], definition["last_return_date"]]).df()
         frame = frame.drop(columns=[ROW_ORDER]).reset_index(drop=True)
         return _restore_enums(frame, layout.get("enums"))
+
+
+def verify_packed_files(source, *, progress=print):
+    """Read every packed file through the reader; each must match its original checksum."""
+    reader = BundleReader(source)
+    manifest = reader.manifest()
+    for name, expected in manifest.get("pack_files", {}).items():
+        digest = hashlib.sha256()
+        with open(Path(source) / name, "rb") as handle:
+            for block in iter(lambda: handle.read(16 << 20), b""):
+                digest.update(block)
+        if digest.hexdigest() != expected:
+            raise ValueError(f"Pack failed its checksum: {name}")
+    for relative in manifest.get("packed", {}):
+        reader.fetch(relative)  # raises on any checksum difference
+    progress(f"all {len(manifest.get('packed', {}))} packed files match their original checksums")
 
 
 def verify_bundles(database, source, interval_ids, *, progress=print):
