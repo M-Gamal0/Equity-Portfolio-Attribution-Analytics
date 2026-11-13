@@ -1,6 +1,9 @@
 # Equity Portfolio Attribution & Analytics
 
 [![Public package checks](https://github.com/M-Gamal0/Equity-Portfolio-Attribution-Analytics/actions/workflows/public-checks.yml/badge.svg)](https://github.com/M-Gamal0/Equity-Portfolio-Attribution-Analytics/actions/workflows/public-checks.yml)
+[![Live dashboard](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://mgamal-portfolio-analytics.streamlit.app)
+
+**Live dashboard:** [mgamal-portfolio-analytics.streamlit.app](https://mgamal-portfolio-analytics.streamlit.app). Choose any period of at least 12 complete months between October 2016 and September 2026.
 
 An end-to-end equity portfolio analytics framework in Python. It explains **what drove a portfolio's return relative to its benchmark, what risks it carried, and how its positioning changed**, using institutional methods: Brinson-Fachler attribution with Carino and Menchero linking, ex-post and holdings-based risk decomposition, Fama-French five-factor plus momentum regressions, Active Share and turnover analysis.
 
@@ -23,7 +26,7 @@ Every calculation reconciles its results: daily contributions sum to portfolio r
 
 ## Two ways to see it
 
-1. **Private research dashboard** (`app/streamlit_app.py`): an eight-page Streamlit app over the original case study, built on licensed historical S&P 500 data. It reads results precomputed offline for every complete-month window of 12 to 120 months between October 2016 and September 2026 (5,995 windows). The data and databases are private and not included in this repository.
+1. **Private research dashboard** (`app/streamlit_app.py`): an eight-page Streamlit app over the original case study, built on licensed historical S&P 500 data. It reads results precomputed offline for every complete-month window of 12 to 120 months between October 2016 and September 2026 (5,995 windows). **[Open the live dashboard](https://mgamal-portfolio-analytics.streamlit.app).** The source data and databases are private and not included in this repository; the hosted app reads only the saved results.
 2. **Public demo** (`app/public_demo_app.py`): the same analytics and dashboard pages on freely available data from Nasdaq, Yahoo Finance and the Kenneth French Data Library, which you download yourself. This makes the project fully reproducible without private data.
 
 ## Quick start: public demo
