@@ -6,8 +6,8 @@ st.set_page_config(page_title="Equity | Portfolio research", page_icon=":materia
 st.set_option("client.disableDataExport", True)
 
 page = st.navigation([
-    st.Page("app_pages/overview.py", title="Overview", icon=":material/dashboard:"),
-    st.Page("app_pages/performance.py", title="Performance", icon=":material/monitoring:", default=True),
+    st.Page("app_pages/overview.py", title="Overview", icon=":material/dashboard:", default=True),
+    st.Page("app_pages/performance.py", title="Performance", icon=":material/monitoring:"),
     st.Page("app_pages/attribution.py", title="Attribution", icon=":material/account_tree:"),
     st.Page("app_pages/risk.py", title="Risk", icon=":material/shield:"),
     st.Page("app_pages/exposures.py", title="Holdings & exposures", icon=":material/donut_large:"),

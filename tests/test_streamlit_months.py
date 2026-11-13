@@ -150,6 +150,9 @@ def test_apply_months_updates_metrics_and_rejects_short_period(ui, monkeypatch, 
     monkeypatch.setattr(ui, "result", saved)
     app = AppTest.from_file(str(APP)).run(timeout=20)
     assert not app.exception
+    assert app.title[0].value == "Overview"  # the app opens on Overview
+    app.switch_page("app_pages/performance.py").run(timeout=20)
+    assert not app.exception
     assert app.metric[0].value == "50.00%"
     assert len(app.get("bidi_component")) == 4
     app.selectbox(key="start_month").set_value("January")
