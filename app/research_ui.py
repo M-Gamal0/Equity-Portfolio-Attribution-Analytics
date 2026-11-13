@@ -17,8 +17,18 @@ from portfolio_analytics.database.month_results import list_month_builds, read_m
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DATABASE = ROOT / "local/analytics_outputs/month_windows.duckdb"
-# Hosted deployments read exported bundles (local folder or hf://datasets/owner/name).
-BUNDLE_SOURCE = bundle_source_from_environment()
+def _configured_bundle_source():
+    """Hosted deployments read exported bundles (local folder or hf://datasets/owner/name).
+
+    Streamlit copies root-level secrets into os.environ only once secrets are loaded, so
+    load them first; this also exposes HF_TOKEN to the Hugging Face client. Without a
+    secrets file this does nothing and the local DuckDB files are used.
+    """
+    st.secrets.load_if_toml_exists()
+    return bundle_source_from_environment()
+
+
+BUNDLE_SOURCE = _configured_bundle_source()
 SERIES = ["Active portfolio", "Benchmark"]
 COLORS = ["#0D9488", "#D97706"]
 FACTOR_NAMES = {"mkt_rf": "Market", "smb": "Size", "hml": "Value", "rmw": "Profitability", "cma": "Investment", "mom": "Momentum", "intercept": "Daily alpha"}
