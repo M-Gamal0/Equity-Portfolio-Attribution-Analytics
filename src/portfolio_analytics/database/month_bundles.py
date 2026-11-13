@@ -338,13 +338,17 @@ class BundleReader:
     def _read_range(self, pack: str, offset: int, length: int) -> bytes:
         """Read one packed file with a single HTTP range request (or a local seek)."""
         if self._remote:
-            from huggingface_hub import HfFileSystem
-            with self._lock:
-                if getattr(self, "_fs", None) is None:
-                    self._fs = HfFileSystem()
-            revision = f"@{self.revision}" if self.revision else ""
-            data = self._fs.cat_file(f"datasets/{self._repo()}{revision}/{pack}",
-                                     start=offset, end=offset + length)
+            # A plain HTTP range request returns exactly the requested bytes; generic file
+            # readers would read ahead several megabytes.
+            from huggingface_hub import get_session, hf_hub_url
+            from huggingface_hub.utils import build_hf_headers
+            url = hf_hub_url(self._repo(), pack, repo_type="dataset", revision=self.revision)
+            headers = build_hf_headers()
+            headers["Range"] = f"bytes={offset}-{offset + length - 1}"
+            response = get_session().get(url, headers=headers, follow_redirects=True)
+            if response.status_code != 206:
+                raise OSError(f"Range request for bundle pack failed with HTTP {response.status_code}.")
+            data = response.content
         else:
             with open(Path(self.source) / pack, "rb") as handle:
                 handle.seek(offset)
